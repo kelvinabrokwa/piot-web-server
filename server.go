@@ -4,17 +4,19 @@ import (
     "fmt"
     "log"
     "net/http"
-    "github.com/gorilla/mux"
     "math/rand"
     "time"
     "encoding/json"
+    "github.com/gorilla/mux"
+    "github.com/rs/cors"
 )
 
 func main() {
     router := mux.NewRouter().StrictSlash(true)
     router.HandleFunc("/", Index)
     router.HandleFunc("/temp", Temperature)
-    log.Fatal(http.ListenAndServe(":8080", router))
+    fmt.Printf("Listening on port: 8080\n")
+    log.Fatal(http.ListenAndServe(":8080", cors.Default().Handler(router)))
 }
 
 func Index(w http.ResponseWriter, r *http.Request) {
@@ -30,9 +32,8 @@ type Temp struct {
 type Temps []Temp
 
 func Temperature(w http.ResponseWriter, r *http.Request) {
-    temps := Temps{
-        Temp{Temperature: rand.Float64()},
-        Temp{Temperature: rand.Float64()},
-    }
-    json.NewEncoder(w).Encode(temps)
+    var currTemp Temp;
+    currTemp.Temperature = rand.Float64() * 100
+    currTemp.Time = time.Now()
+    json.NewEncoder(w).Encode(currTemp)
 }
